@@ -6,12 +6,14 @@ import { createContext, useContext, useState } from "react";
 const DashboardContext = createContext();
 
 const DashboardLayout = () => {
-  const user = { name: "Sujan" };
+  const user = { name: 'Sujan',number: 5 };
   const [showSidebar, setShowSidebar] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(false);
 
   const toggleDarkTheme = () => {
-    console.log("Dark theme toggled");
+    const newTheme = !isDarkTheme;
+    setIsDarkTheme(newTheme)
+    document.body.classList.toggle('dark-theme', newTheme)
   };
 
   const toggleSidebar = () => {

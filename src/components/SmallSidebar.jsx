@@ -5,6 +5,7 @@ import Logo from "./Logo";
 import { useDashboardContext } from "../pages/DashboardLayout";
 import { useState } from "react";
 import links from "../utils/links";
+import Navlinks from "./Navlinks";
 const SmallSidebar = () => {
   const { showSidebar, toggleSidebar } = useDashboardContext();
   const [isOn, setIsOn] = useState("false");
@@ -23,15 +24,7 @@ const SmallSidebar = () => {
           </button>
           <header>
             <Logo />
-            <div className="nav-links">
-              {links.map((link) => {
-                return (
-                  <NavLink to={link.path} key={link.text} className="nav-link">
-                    <span className="icon">{link.icon}</span> {link.text}
-                  </NavLink>
-                );
-              })}
-            </div>
+            <Navlinks />
           </header>
         </div>
       </div>
