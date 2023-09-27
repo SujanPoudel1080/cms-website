@@ -1,2 +1,2 @@
-# vue-typescript
-random repo for vue 3 and typescript
+# CMS Website
+CMS website suitable for businesses
