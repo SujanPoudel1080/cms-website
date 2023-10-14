@@ -6,10 +6,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
 require("dotenv/config");
 var morgan_1 = __importDefault(require("morgan"));
+var jobRouter_js_1 = __importDefault(require("./routes/jobRouter.js"));
 var app = (0, express_1.default)();
 app.use(express_1.default.json());
 process.env.NODE_ENV === "development" ? app.use((0, morgan_1.default)("dev")) : null;
 var port = process.env.PORT || 8000;
+app.use('/api/v1/jobs', jobRouter_js_1.default);
 app.get("/", function (req, res) {
     res.send("Hello!");
 });
@@ -31,56 +33,11 @@ var jobs = [
         position: "backend",
     },
 ];
-app.get("/api/v1/jobs", function (req, res) {
-    res.status(200).json({ jobs: jobs });
-});
-app.post("/api/v1/jobs", function (req, res) {
-    var _a = req.body, id = _a.id, company = _a.company, position = _a.position;
-    if (!id || !company || !position) {
-        return res
-            .status(400)
-            .json({ message: "Please provide company and position" });
-    }
-    var job = { id: id, company: company, position: position };
-    jobs.push(job);
-    res.status(200).json({ job: job });
-});
-app.get("/api/v1/jobs/:id", function (req, res) {
-    var id = req.params.id;
-    var job = jobs.find(function (job) { return job.id === id; });
-    if (!job) {
-        return res.status(404).json({ message: "No job with id ".concat(id, " exists") });
-    }
-    res.status(200).json({ message: "Success", data: job });
-});
-app.patch("/api/v1/jobs/:id", function (req, res) {
-    var id = req.params.id;
-    var _a = req.body, company = _a.company, position = _a.position;
-    if (!company && !position) {
-        return res
-            .status(404)
-            .json({ message: "please provide company name and position" });
-    }
-    var job = jobs.find(function (job) { return job.id === id; });
-    if (!job) {
-        return res.status(404).json({ message: "No job with id ".concat(id, " exists") });
-    }
-    job.company = company;
-    job.position = position;
-    res.status(200).json({ message: "job successfully edited", data: jobs });
-});
-app.delete("api/v1/jobs/:id", function (req, res) {
-    var id = req.params.id;
-    var job = jobs.find(function (job) { return job.id === id; });
-    if (!job) {
-        return res
-            .status(404)
-            .json({ message: "job with id ".concat(id, " does not exist") });
-    }
-    var newJob = jobs.filter(function (job) { return job.id !== id; });
-    jobs = newJob;
-    res.status(200).json({ message: "job deleted successfully", jobs: jobs });
-});
+app.get("/api/v1/jobs");
+app.post("/api/v1/jobs");
+app.get("/api/v1/jobs/:id");
+app.patch("/api/v1/jobs/:id");
+app.delete("api/v1/jobs/:id");
 app.use("*", function (req, res) {
     res.status(404).json({ message: "Not Found" });
 });
