@@ -2,6 +2,8 @@ import express from "express";
 import "dotenv/config";
 import morgan from "morgan";
 import jobRouter from "./routes/jobRouter.js";
+import db from "./utils/db.js";
+import { body, validationResult } from "express-validator";
 
 interface Job {
   id: string;
@@ -13,11 +15,37 @@ const app = express();
 app.use(express.json());
 process.env.NODE_ENV === "development" ? app.use(morgan("dev")) : null;
 const port = process.env.PORT || 8000;
+db();
 
-app.use('/api/v1/jobs', jobRouter);
+app.use("/api/v1/jobs", jobRouter);
+
+app.post(
+  "/api/v1/test",
+  [
+    body("name")
+      .notEmpty()
+      .withMessage("name is a required field")
+      .isLength({ min: 10, max: 40 })
+      .withMessage(
+        "the name should be at least 10 characters long and at most 40 characters long"
+      ),
+  ],
+  (req: express.Request, res: express.Response, next: any) => {
+    const errors = validationResult(req);
+    const errorMessages = errors.array().map((error) => error.msg);
+    return res.status(400).json({ errors: errorMessages });
+    next();
+  },
+  (req: express.Request, res: express.Response) => {
+    const { name } = req.body;
+    res.json({ message: `hello ${name}`, data: req.body });
+  }
+);
+
 app.get("/", (req: express.Request, res: express.Response) => {
   res.send("Hello!");
 });
+
 app.post("/", (req: express.Request, res: express.Response) => {
   res.json({ message: "Data received", status: 200, data: req.body });
 });

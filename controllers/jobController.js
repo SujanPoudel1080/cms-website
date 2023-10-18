@@ -35,86 +35,115 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteJob = exports.updateJob = exports.getJob = exports.createJob = exports.getAllJobs = void 0;
-var jobs = [
-    {
-        id: "1",
-        company: "Apple",
-        position: "frontend",
-    },
-    {
-        id: "2",
-        company: "Google",
-        position: "backend",
-    },
-];
-var getAllJobs = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+require("express-async-errors");
+var http_status_codes_1 = require("http-status-codes");
+var jobModel_js_1 = __importDefault(require("../models/jobModel.js"));
+var customErrors_js_1 = require("../utils/customErrors.js");
+var getAllJobs = function (res) { return __awaiter(void 0, void 0, void 0, function () {
+    var jobs;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, res.status(200).json({ message: "Got jobs successfully", jobs: jobs })];
+            case 0: return [4 /*yield*/, jobModel_js_1.default.find()];
             case 1:
-                _a.sent();
+                jobs = _a.sent();
+                res.status(http_status_codes_1.StatusCodes.OK).json({ message: "Got jobs successfully", jobs: jobs });
                 return [2 /*return*/];
         }
     });
 }); };
 exports.getAllJobs = getAllJobs;
 var createJob = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, id, company, position, job;
-    return __generator(this, function (_b) {
-        _a = req.body, id = _a.id, company = _a.company, position = _a.position;
-        if (!id || !company || !position) {
-            res.status(400).json({ message: "please enter all the necessary details" });
-            return [2 /*return*/];
+    var job, error_1;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, jobModel_js_1.default.create(req.body)];
+            case 1:
+                job = _a.sent();
+                res
+                    .status(http_status_codes_1.StatusCodes.CREATED)
+                    .json({ message: "New job created successfully", job: job });
+                return [3 /*break*/, 3];
+            case 2:
+                error_1 = _a.sent();
+                console.log(error_1);
+                res
+                    .status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR)
+                    .json({ message: "server error" });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
         }
-        job = { id: id, company: company, position: position };
-        jobs.push(job);
-        res.status(201).json({ job: job });
-        return [2 /*return*/];
     });
 }); };
 exports.createJob = createJob;
-var getJob = function (req, res) {
-    var id = req.params.id;
-    var job = jobs.find(function (job) { return job.id == id; });
-    if (!job) {
-        res.status(400).json({ message: "the job with id ".concat(id, " doesnot exist") });
-    }
-    res.status(200).json({ message: "job found sucessfully", job: job });
-};
+var getJob = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, job;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                id = req.params.id;
+                return [4 /*yield*/, jobModel_js_1.default.findById(id)];
+            case 1:
+                job = _a.sent();
+                if (!job)
+                    throw new customErrors_js_1.NotFoundError("job with id ".concat(id, " doesnot exist"));
+                res.status(http_status_codes_1.StatusCodes.OK).json({ message: "job found sucessfully", job: job });
+                return [2 /*return*/];
+        }
+    });
+}); };
 exports.getJob = getJob;
 var updateJob = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var id, _a, company, position, job;
-    return __generator(this, function (_b) {
-        id = req.params.id;
-        _a = req.body, company = _a.company, position = _a.position;
-        job = jobs.find(function (job) { return job.id === id; });
-        if (!job) {
-            res.status(400).json({ message: "job with id ".concat(id, " doesnot exist") });
-            return [2 /*return*/];
+    var id, updatedJob;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                id = req.params.id;
+                return [4 /*yield*/, jobModel_js_1.default.findByIdAndUpdate(id, req.body, {
+                        new: true,
+                    })];
+            case 1:
+                updatedJob = _a.sent();
+                if (!updatedJob) {
+                    res
+                        .status(http_status_codes_1.StatusCodes.BAD_REQUEST)
+                        .json({ message: "job with id ".concat(id, " doesnot exist") });
+                    return [2 /*return*/];
+                }
+                res
+                    .status(http_status_codes_1.StatusCodes.OK)
+                    .json({ message: "job modified successfully", job: updatedJob });
+                return [2 /*return*/];
         }
-        job.company = company;
-        job.position = position;
-        res.status(200).json({ message: "job modified successfully", jobs: jobs });
-        return [2 /*return*/];
     });
 }); };
 exports.updateJob = updateJob;
 var deleteJob = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var id, job;
+    var id, removedJob;
     return __generator(this, function (_a) {
-        id = req.params.id;
-        job = jobs.find(function (job) { return job.id === id; });
-        if (!job) {
-            res
-                .status(400)
-                .json({ message: "job with id ".concat(id, " doesnot exist. Cannot delete.") });
-            return [2 /*return*/];
+        switch (_a.label) {
+            case 0:
+                id = req.params.id;
+                return [4 /*yield*/, jobModel_js_1.default.findByIdAndDelete(id)];
+            case 1:
+                removedJob = _a.sent();
+                if (!removedJob) {
+                    res
+                        .status(http_status_codes_1.StatusCodes.BAD_REQUEST)
+                        .json({ message: "job with id ".concat(id, " doesnot exist. Cannot delete.") });
+                    return [2 /*return*/];
+                }
+                res
+                    .status(http_status_codes_1.StatusCodes.OK)
+                    .json({ message: "Job deleted successfully", job: removedJob });
+                return [2 /*return*/];
         }
-        jobs = jobs.filter(function (job) { return job.id !== id; });
-        res.status(200).json({ message: "Job deleted successfully", jobs: jobs });
-        return [2 /*return*/];
     });
 }); };
 exports.deleteJob = deleteJob;
